@@ -14,6 +14,8 @@ imun_individu = []
 waktu_pemulihan_individu = []
 
 for p in range(jumlah_individu):
+    kor_x = random.randint(-10, 10)
+    kor_y = random.randint(-10, 10)
     posisi_individu.append([0,0])
 
 def infected_individu(allocate_infected_individu,jumlah_individu_terinfeksi):
@@ -36,14 +38,16 @@ def generate_pergerakan(n):
         x = posisi_individu[i][0]
         y = posisi_individu[i][1]
         step = random.uniform(0,1)
-        if step <= 0.25:
-            x = x+1
-        elif step <= 0.50:
-            y = y - 1
-        elif step <= 0.75:
-            x = x-1
+        if step <= 0.20:
+            x = x+1 #Kanan
+        elif step <= 0.40:
+            y = y-1 #Bawah
+        elif step <= 0.60:
+            x = x-1 #Kiri
+        elif step <= 0.80:
+            y = y+1 #Atas
         else:
-            y = y + 1
+            continue   #Diam
             
         x_max =  20
         x_min = -20
@@ -51,6 +55,7 @@ def generate_pergerakan(n):
         y_max =  20
         y_min = -20
         
+        #PBC Method
         if x > x_max:
             x = x - x_max
         if x < x_min:
