@@ -59,11 +59,11 @@ def generate_pergerakan(n):
         else:
             continue  # Diam
 
-        x_max = 20
-        x_min = -20
+        x_max = 10
+        x_min = -10
 
-        y_max = 20
-        y_min = -20
+        y_max = 10
+        y_min = -10
 
         # PBC Method
         if x > x_max:
