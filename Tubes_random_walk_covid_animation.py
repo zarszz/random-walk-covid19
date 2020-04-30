@@ -2,7 +2,9 @@ import random
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import numpy as np
+import numpy
+
+from matplotlib.animation import FuncAnimation
 
 # variabel
 jumlah_individu = 200
@@ -12,13 +14,14 @@ total_waktu_pemulihan = 0
 jumlah_individu_terinfeksi = [0]
 
 kondisi_individu_saat_ini = []
-kondisi_color = []
 posisi_terinfeksi = []
 posisi_individu = []
 imun_individu = []
 waktu_pemulihan_individu = []
 
 data_invidu_terinfeksi = []
+kondisi_color_setiap_waktu = []
+posisi_individu_setiap_waktu = []
 
 for p in range(jumlah_individu):
     kor_x = random.randint(-10, 10)
@@ -96,54 +99,51 @@ def current_position_that_infected(n):
             waktu_pemulihan_individu[i] = 1
             jumlah_individu_terinfeksi[0] += 1
 
-
 while jumlah_individu_terinfeksi[0] > 0:
     posisi_terinfeksi.clear()
-    print("hari ke:", total_waktu_pemulihan)
     total_waktu_pemulihan += 1
     for i in range(jumlah_individu):
+        warna = 'blue'
         generate_pergerakan(jumlah_individu)
         current_position_that_infected(jumlah_individu)
-        print("individu: ", i)
-        print("kondisi individu: ", kondisi_individu_saat_ini[i])
-        print("kondisi imun individu: ", imun_individu[i])
-        print("posisi individu: {}".format(posisi_individu[i]))
-        print("sisa waktu pemulihan individu: ", waktu_pemulihan_individu[i])
-        print("\n")
         if kondisi_individu_saat_ini[i] == 'terinfeksi':
             waktu_sembuh = waktu_pemulihan_individu[i] + 1
             waktu_pemulihan_individu[i] = waktu_sembuh
+            warna = 'red'
             if waktu_pemulihan_individu[i] >= waktu_pemulihan:
                 imun_individu[i] = 'punya imun'
                 kondisi_individu_saat_ini[i] = 'tidak terinfeksi'
                 jumlah_individu_terinfeksi[0] = jumlah_individu_terinfeksi[0] - 1
+                warna = 'blue'
+        posisi_individu_setiap_waktu.append(posisi_individu[i])
+        kondisi_color_setiap_waktu.append(warna)
     data_invidu_terinfeksi.append(jumlah_individu_terinfeksi[0])
-    print('total pasien ter infeksi: ', jumlah_individu_terinfeksi[0])
-
-print('hasil akhir\n')
-for j in range(jumlah_individu):
-    print("individu: ", j)
-    print("kondisi individu: ", kondisi_individu_saat_ini[j])
-    print("kondisi imun individu: ", imun_individu[j])
-    print("posisi individu: {}".format(posisi_individu[j]))
-    print("sisa waktu pemulihan individu: ", waktu_pemulihan_individu[j])
+    # print('total pasien ter infeksi: ', jumlah_individu_terinfeksi[0])
 
 print("total hari pemulihan: ", total_waktu_pemulihan)
 
-fig, ax = plt.subplots()
-data_hari = [hari for hari in range(len(data_invidu_terinfeksi))]
+kondisi_individu_x = numpy.array(posisi_individu_setiap_waktu)[:, 0]
+kondisi_individu_y = numpy.array(posisi_individu_setiap_waktu)[:, 1]
 
-ax.plot(data_hari, data_invidu_terinfeksi)
-ax.set_xlabel('Hari ke-')
-ax.set_ylabel('Jumlah Infeksi')
-ax.set_title('Figure Jumlah Infeksi Perhari')
 
-minimal_patch = mpatches.Patch(label=f'{min(data_invidu_terinfeksi)} Jumlah maksimal infeksi')
-maximal_patch = mpatches.Patch(label=f'{max(data_invidu_terinfeksi)} Jumlah maksimal infeksi')
-hari_dibutuhkan = mpatches.Patch(label=f'{total_waktu_pemulihan} Hari pemulihan')
-plt.legend(handles=[minimal_patch, maximal_patch, hari_dibutuhkan], bbox_to_anchor=(1.04, 1), loc='upper right')
+fig = plt.figure()
+ax = fig.add_subplot(111)
 
-plt.xticks(np.arange(min(data_hari), max(data_hari) + 1, 25))
-plt.yticks(np.arange(min(data_invidu_terinfeksi), max(data_invidu_terinfeksi) + 1, 2))
+scat = plt.scatter(kondisi_individu_x, kondisi_individu_y)
+
+
+def update(frame_number, color_data, scat):
+    scat.set_offsets((kondisi_individu_x[frame_number], kondisi_individu_y[frame_number]))
+    scat.set_color(color_data[frame_number])
+    return scat
+
+
+animation = FuncAnimation(fig, update, fargs=(kondisi_color_setiap_waktu, scat),
+                          frames=500, interval=100, repeat=False)
+infeksi_patch = mpatches.Patch(color='red', label='Individu Terinfeksi')
+non_infeksi_patch = mpatches.Patch(color='blue', label='Individu Pulih Atau Tidak Terinfeksi')
+plt.legend(handles=[infeksi_patch, non_infeksi_patch])
 
 plt.show()
+
+animation.save('ucok.mp4')
